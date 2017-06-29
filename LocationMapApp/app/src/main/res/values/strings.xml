@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Location Map App</string>
+
+    <string name="base_url">http://localsearch.azurewebsites.net/api/</string>
+    <string name="locations_endpoint">Locations</string>
+
+
+    <string name="network_error">A network error has transpired</string>
+    <string name="no_destinations_error">No Destinations Currently Available.</string>
+
 </resources>
