@@ -3,13 +3,15 @@ package com.ozan_kalan.locationmapapp.models;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  * Created by ozan.kalan on 6/28/17.
  *
  * This class represents the location objects that are returned from the json
  */
 
-public class LocationModel {
+public class LocationModel implements Serializable{
 
     @SerializedName("ID")
     @Expose

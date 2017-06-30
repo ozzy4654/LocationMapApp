@@ -2,7 +2,6 @@ package com.ozan_kalan.locationmapapp.ui;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.v7.app.AppCompatActivity;
@@ -15,13 +14,20 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.ozan_kalan.locationmapapp.R;
 import com.ozan_kalan.locationmapapp.adapters.LocationAdapter;
 import com.ozan_kalan.locationmapapp.models.LocationModel;
 
+import java.io.IOException;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 import static com.ozan_kalan.locationmapapp.ui.LocationDetailedActivity.LOCATION_ADDRESS;
 import static com.ozan_kalan.locationmapapp.ui.LocationDetailedActivity.LOCATION_ETA;
@@ -54,7 +60,76 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.L
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        mGson = new GsonBuilder().create();
         BASE_URL = getString(R.string.base_url);
+
+        mLinearLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLinearLayoutManager);
+        mLocationAdapter = new LocationAdapter(this);
+        mRecyclerView.setAdapter(mLocationAdapter);
+
+        queryLocationAPI(getResources().getString(R.string.locations_endpoint));
+
+    }
+
+
+    private void queryLocationAPI(String query) {
+        try {
+            if (isOnline())
+                apiCall(query);
+            else
+                showError();
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError();
+        }
+    }
+
+    private void apiCall(final String query) {
+        final Request request  = new Request.Builder()
+                .url(BASE_URL + query)
+                .build();
+
+        mClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        showError();
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+
+                final String json = response.body().string();
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setAdapter(json);
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * Now that we have the data from API
+     * we can set our adapter and show the posters
+     * to the user
+     */
+    private void setAdapter(String json) {
+        mRecyclerView.setVisibility(View.VISIBLE);
+        mNetworkError.setVisibility(View.INVISIBLE);
+
+        LocationModel[] mm = mGson.fromJson(json, LocationModel[].class);
+        mm[0].getAddress();
+
+        mLocationAdapter.setData(mm);
     }
 
     @Override

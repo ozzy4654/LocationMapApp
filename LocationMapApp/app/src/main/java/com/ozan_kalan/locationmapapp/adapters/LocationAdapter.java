@@ -9,8 +9,6 @@ import android.widget.TextView;
 import com.ozan_kalan.locationmapapp.R;
 import com.ozan_kalan.locationmapapp.models.LocationModel;
 
-import java.util.List;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -20,7 +18,7 @@ import butterknife.ButterKnife;
 
 public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.LocationViewHolder> {
 
-    private List<LocationModel> mLocationList;
+    private LocationModel[] mLocationList;
 
     private final LocationAdapterOnClickHandler mClickHandler;
 
@@ -44,7 +42,7 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
 
     @Override
     public void onBindViewHolder(LocationAdapter.LocationViewHolder holder, int position) {
-        final LocationModel locationModel = mLocationList.get(position);
+        final LocationModel locationModel = mLocationList[position];
 
         holder.mAddress.setText(locationModel.getAddress());
         holder.mLocationName.setText(locationModel.getName());
@@ -54,15 +52,15 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
     public int getItemCount() {
         if (mLocationList == null)
             return 0;
-        return mLocationList.size();
+        return mLocationList.length;
     }
 
     /** this method updates the adapters data
-     * @param movieList*/
-    public void setData(List<LocationModel> movieList) {
+     * @param mm*/
+    public void setData(LocationModel[] mm) {
         if (mLocationList != null)
-            mLocationList.clear();
-        mLocationList = movieList;
+            mLocationList= null;
+        mLocationList = mm;
         notifyDataSetChanged();
     }
 
@@ -75,12 +73,14 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
         public LocationViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+            itemView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
-            if (mLocationList != null)
-                mClickHandler.onClick(mLocationList.get(getAdapterPosition()));
+            if (mLocationList != null) {
+                mClickHandler.onClick(mLocationList[getAdapterPosition()]);
+            }
         }
     }
 }
