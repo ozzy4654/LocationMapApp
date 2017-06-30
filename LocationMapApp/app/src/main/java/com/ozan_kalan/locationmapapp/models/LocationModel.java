@@ -1,17 +1,19 @@
 package com.ozan_kalan.locationmapapp.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.io.Serializable;
 
 /**
  * Created by ozan.kalan on 6/28/17.
- *
+ * <p>
  * This class represents the location objects that are returned from the json
  */
 
-public class LocationModel implements Serializable{
+public class LocationModel implements Parcelable {
 
     @SerializedName("ID")
     @Expose
@@ -31,6 +33,26 @@ public class LocationModel implements Serializable{
     @SerializedName("ArrivalTime")
     @Expose
     private String arrivalTime;
+
+    public final static Parcelable.Creator<LocationModel> CREATOR = new Creator<LocationModel>() {
+
+        @SuppressWarnings({"unchecked"})
+        public LocationModel createFromParcel(Parcel in) {
+            LocationModel instance = new LocationModel();
+            instance.iD = ((Integer) in.readValue((Integer.class.getClassLoader())));
+            instance.name = ((String) in.readValue((String.class.getClassLoader())));
+            instance.latitude = ((Double) in.readValue((Double.class.getClassLoader())));
+            instance.longitude = ((Double) in.readValue((Double.class.getClassLoader())));
+            instance.address = ((String) in.readValue((String.class.getClassLoader())));
+            instance.arrivalTime = ((String) in.readValue((String.class.getClassLoader())));
+            return instance;
+        }
+
+        public LocationModel[] newArray(int size) {
+            return (new LocationModel[size]);
+        }
+
+    };
 
     public Integer getID() {
         return iD;
@@ -80,4 +102,18 @@ public class LocationModel implements Serializable{
         this.arrivalTime = arrivalTime;
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeValue(iD);
+        dest.writeValue(name);
+        dest.writeValue(latitude);
+        dest.writeValue(longitude);
+        dest.writeValue(address);
+        dest.writeValue(arrivalTime);
+    }
 }

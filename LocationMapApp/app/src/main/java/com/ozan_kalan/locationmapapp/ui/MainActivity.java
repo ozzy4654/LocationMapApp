@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,6 +21,11 @@ import com.ozan_kalan.locationmapapp.adapters.LocationAdapter;
 import com.ozan_kalan.locationmapapp.models.LocationModel;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -46,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.L
 
     private String BASE_URL;
 
+    private List<LocationModel> mm;
 
     @BindView(R.id.location_list_recycler_view) RecyclerView mRecyclerView;
     @BindView(R.id.network_error_txt_view) TextView mNetworkError;
@@ -68,7 +75,12 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.L
         mLocationAdapter = new LocationAdapter(this);
         mRecyclerView.setAdapter(mLocationAdapter);
 
-        queryLocationAPI(getResources().getString(R.string.locations_endpoint));
+        if (savedInstanceState != null) {
+            ArrayList<LocationModel> mSavedList = savedInstanceState.getParcelableArrayList("LIST");
+            mLocationAdapter.setData(mSavedList);
+        }
+        else
+            queryLocationAPI(getResources().getString(R.string.locations_endpoint));
 
     }
 
@@ -126,9 +138,7 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.L
         mRecyclerView.setVisibility(View.VISIBLE);
         mNetworkError.setVisibility(View.INVISIBLE);
 
-        LocationModel[] mm = mGson.fromJson(json, LocationModel[].class);
-        mm[0].getAddress();
-
+        mm = new ArrayList<>(Arrays.asList(mGson.fromJson(json, LocationModel[].class)));
         mLocationAdapter.setData(mm);
     }
 
@@ -141,15 +151,40 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.L
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.sort_name) {
+            mm = mLocationAdapter.getData();
+            Collections.sort(mm, new Comparator<LocationModel>() {
+                @Override
+                public int compare(LocationModel o1, LocationModel o2) {
+                    return o1.getName().compareToIgnoreCase(o2.getName());
+                }
+            });
+            mLocationAdapter.notifyDataSetChanged();
             return true;
         }
         if (item.getItemId() == R.id.sort_distance) {
+            mm = mLocationAdapter.getData();
+            Collections.sort(mm, new Comparator<LocationModel>() {
+                @Override
+                public int compare(LocationModel o1, LocationModel o2) {
+                    System.out.println("OBJ1  "+o1.getArrivalTime());
+                    System.out.println("OBJ2  "+o2.getArrivalTime());
 
+                    return o1.getArrivalTime().compareToIgnoreCase(o2.getArrivalTime());
+                }
+            });
+            mLocationAdapter.notifyDataSetChanged();
             return true;
         }
 
         if (item.getItemId() == R.id.sort_eta) {
-
+            mm = mLocationAdapter.getData();
+            Collections.sort(mm, new Comparator<LocationModel>() {
+                @Override
+                public int compare(LocationModel o1, LocationModel o2) {
+                    return o1.getName().compareToIgnoreCase(o2.getName());
+                }
+            });
+            mLocationAdapter.notifyDataSetChanged();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -159,6 +194,7 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.L
     protected void onSaveInstanceState(Bundle output) {
         super.onSaveInstanceState(output);
 
+        output.putParcelableArrayList("LIST",  new ArrayList<Parcelable>(mLocationAdapter.getData()));
     }
 
     /**

@@ -7,11 +7,9 @@ import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.ozan_kalan.locationmapapp.R;
 
@@ -38,7 +36,6 @@ public class LocationDetailedActivity extends AppCompatActivity implements OnMap
     @BindView(R.id.latitdue_txt) TextView mLatitdue;
     @BindView(R.id.longitude_txt) TextView mLongitude;
 
-//    @BindView(R.id.mapView) MapView mMap;
 
     private Bundle bundle;
 
@@ -57,7 +54,6 @@ public class LocationDetailedActivity extends AppCompatActivity implements OnMap
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mapView);
-
         mapFragment.getMapAsync(this);
 
 
