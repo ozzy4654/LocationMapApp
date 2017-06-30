@@ -43,9 +43,10 @@ public class LocationDetailedActivity extends AppCompatActivity implements OnMap
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detailed_location);
+        bundle = getIntent().getExtras();
         ButterKnife.bind(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        bundle = getIntent().getExtras();
+        setTitle(bundle.getString(LOCATION_NAME));
         setupViews();
 
     }
