@@ -5,6 +5,14 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.ozan_kalan.locationmapapp.R;
 
 import butterknife.BindView;
@@ -14,7 +22,7 @@ import butterknife.ButterKnife;
  * Created by ozan.kalan on 6/28/17.
  */
 
-public class LocationDetailedActivity extends AppCompatActivity{
+public class LocationDetailedActivity extends AppCompatActivity implements OnMapReadyCallback{
 
     public static final String LOCATION_ADDRESS = "location_address";
     public static final String LOCATION_NAME = "location_name";
@@ -30,20 +38,28 @@ public class LocationDetailedActivity extends AppCompatActivity{
     @BindView(R.id.latitdue_txt) TextView mLatitdue;
     @BindView(R.id.longitude_txt) TextView mLongitude;
 
+//    @BindView(R.id.mapView) MapView mMap;
+
+    private Bundle bundle;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detailed_location);
         ButterKnife.bind(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+        bundle = getIntent().getExtras();
         setupViews();
 
     }
 
     private void setupViews() {
 
-        Bundle bundle = getIntent().getExtras();
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.mapView);
+
+        mapFragment.getMapAsync(this);
+
 
         mEta.setText(bundle.getString(LOCATION_ETA));
         mName.setText(bundle.getString(LOCATION_NAME));
@@ -51,8 +67,13 @@ public class LocationDetailedActivity extends AppCompatActivity{
         mLatitdue.setText( String.valueOf(bundle.getDouble(LOCATION_LAT)));
         mLongitude.setText(String.valueOf(bundle.getDouble(LOCATION_LONG)));
 
+    }
 
-
-
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        LatLng sydney = new LatLng(bundle.getDouble(LOCATION_LAT), bundle.getDouble(LOCATION_LONG));
+        googleMap.addMarker(new MarkerOptions().position(sydney)
+                .title(mName.getText().toString()));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 15.0f));
     }
 }
