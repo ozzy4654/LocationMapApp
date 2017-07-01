@@ -1,7 +1,6 @@
 package com.ozan_kalan.locationmapapp.ui;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Parcelable;
@@ -44,22 +43,21 @@ import static com.ozan_kalan.locationmapapp.ui.LocationDetailedActivity.LOCATION
 
 public class MainActivity extends AppCompatActivity implements LocationAdapter.LocationAdapterOnClickHandler {
 
+    public static final String LIST = "list";
+
     private LocationAdapter mLocationAdapter;
     private Gson mGson;
-    private LinearLayoutManager mLinearLayoutManager;
+    private String mBaseUrl;
+    private List<LocationModel> mLocations;
 
-    private SharedPreferences.Editor mEditor;
-
-    private String BASE_URL;
-
-    private List<LocationModel> mm;
-
-    @BindView(R.id.location_list_recycler_view) RecyclerView mRecyclerView;
-    @BindView(R.id.network_error_txt_view) TextView mNetworkError;
-    @BindView(R.id.no_locations_txt_view) TextView mNoLocations;
+    @BindView(R.id.location_list_recycler_view)
+    RecyclerView mRecyclerView;
+    @BindView(R.id.network_error_txt_view)
+    TextView mNetworkError;
+    @BindView(R.id.no_locations_txt_view)
+    TextView mNoLocations;
 
     OkHttpClient mClient = new OkHttpClient();
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,23 +66,29 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.L
         ButterKnife.bind(this);
 
         mGson = new GsonBuilder().create();
-        BASE_URL = getString(R.string.base_url);
+        mBaseUrl = getString(R.string.base_url);
 
-        mLinearLayoutManager = new LinearLayoutManager(this);
+        LinearLayoutManager mLinearLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
         mLocationAdapter = new LocationAdapter(this);
         mRecyclerView.setAdapter(mLocationAdapter);
 
         if (savedInstanceState != null) {
-            ArrayList<LocationModel> mSavedList = savedInstanceState.getParcelableArrayList("LIST");
+            ArrayList<LocationModel> mSavedList = savedInstanceState.getParcelableArrayList(LIST);
             mLocationAdapter.setData(mSavedList);
-        }
-        else
+        } else
             queryLocationAPI(getResources().getString(R.string.locations_endpoint));
 
     }
 
 
+    /**
+     * This method checks to see if the device is online,
+     * if so it will call our apiCall method
+     * <p>
+     * if the device is offline then the app will show its not
+     * connected to inform the user.
+     */
     private void queryLocationAPI(String query) {
         try {
             if (isOnline())
@@ -97,9 +101,14 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.L
         }
     }
 
+    /**
+     * This method will build our query and request
+     * to call the Api to retrieve the data.
+     * it will also handle a request failure
+     */
     private void apiCall(final String query) {
-        final Request request  = new Request.Builder()
-                .url(BASE_URL + query)
+        final Request request = new Request.Builder()
+                .url(mBaseUrl + query)
                 .build();
 
         mClient.newCall(request).enqueue(new Callback() {
@@ -138,8 +147,9 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.L
         mRecyclerView.setVisibility(View.VISIBLE);
         mNetworkError.setVisibility(View.INVISIBLE);
 
-        mm = new ArrayList<>(Arrays.asList(mGson.fromJson(json, LocationModel[].class)));
-        mLocationAdapter.setData(mm);
+        mLocations = new ArrayList<>(Arrays.asList(mGson.fromJson(json, LocationModel[].class)));
+        sortLocations(mLocations, 0);
+        mLocationAdapter.setData(mLocations);
     }
 
     @Override
@@ -148,43 +158,49 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.L
         return true;
     }
 
+    /**
+     * This method is used to sort our List of locations.
+     * depending on the int passed in,it will sort by name, location, eta, and defaults to name
+     */
+    private void sortLocations(List<LocationModel> locationsList, final int caseNum) {
+
+
+        Collections.sort(locationsList, new Comparator<LocationModel>() {
+            @Override
+            public int compare(LocationModel o1, LocationModel o2) {
+
+                switch (caseNum) {
+                    case 0:
+                        return o1.getName().compareToIgnoreCase(o2.getName());
+
+                    case 1:
+                        return o1.getAddress().compareToIgnoreCase(o2.getAddress());
+
+                    case 2:
+                        return o1.getArrivalTime().compareToIgnoreCase(o2.getArrivalTime());
+
+                    default:
+                        return o1.getName().compareToIgnoreCase(o2.getName());
+                }
+            }
+        });
+        mLocationAdapter.notifyDataSetChanged();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.sort_name) {
-            mm = mLocationAdapter.getData();
-            Collections.sort(mm, new Comparator<LocationModel>() {
-                @Override
-                public int compare(LocationModel o1, LocationModel o2) {
-                    return o1.getName().compareToIgnoreCase(o2.getName());
-                }
-            });
-            mLocationAdapter.notifyDataSetChanged();
+            sortLocations(mLocationAdapter.getData(), 0);
             return true;
         }
         if (item.getItemId() == R.id.sort_distance) {
-            mm = mLocationAdapter.getData();
-            Collections.sort(mm, new Comparator<LocationModel>() {
-                @Override
-                public int compare(LocationModel o1, LocationModel o2) {
-                    System.out.println("OBJ1  "+o1.getArrivalTime());
-                    System.out.println("OBJ2  "+o2.getArrivalTime());
 
-                    return o1.getArrivalTime().compareToIgnoreCase(o2.getArrivalTime());
-                }
-            });
-            mLocationAdapter.notifyDataSetChanged();
+            sortLocations(mLocationAdapter.getData(), 1);
             return true;
         }
 
         if (item.getItemId() == R.id.sort_eta) {
-            mm = mLocationAdapter.getData();
-            Collections.sort(mm, new Comparator<LocationModel>() {
-                @Override
-                public int compare(LocationModel o1, LocationModel o2) {
-                    return o1.getName().compareToIgnoreCase(o2.getName());
-                }
-            });
-            mLocationAdapter.notifyDataSetChanged();
+            sortLocations(mLocationAdapter.getData(), 2);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -193,8 +209,7 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.L
     @Override
     protected void onSaveInstanceState(Bundle output) {
         super.onSaveInstanceState(output);
-
-        output.putParcelableArrayList("LIST",  new ArrayList<Parcelable>(mLocationAdapter.getData()));
+        output.putParcelableArrayList(LIST, new ArrayList<Parcelable>(mLocationAdapter.getData()));
     }
 
     /**
@@ -211,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.L
 
     /**
      * In the event a network error occurred
-     * this methond will tell notify the user
+     * this method will tell notify the user
      */
     private void showError() {
         mRecyclerView.setVisibility(View.INVISIBLE);

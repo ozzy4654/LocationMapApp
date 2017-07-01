@@ -9,7 +9,6 @@ import android.widget.TextView;
 import com.ozan_kalan.locationmapapp.R;
 import com.ozan_kalan.locationmapapp.models.LocationModel;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -17,6 +16,9 @@ import butterknife.ButterKnife;
 
 /**
  * Created by ozan.kalan on 6/28/17.
+ * <p>
+ * This Adapter is for our recycler view it shows a list of all our locations
+ * Also have a click handler so the parent can handle click events
  */
 
 public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.LocationViewHolder> {
@@ -25,7 +27,9 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
 
     private final LocationAdapterOnClickHandler mClickHandler;
 
-    /** interface to be used to handle onClick diresired actions from the activity */
+    /**
+     * interface to be used to handle onClick diresired actions from the activity
+     */
     public interface LocationAdapterOnClickHandler {
         void onClick(LocationModel locationModel);
     }
@@ -33,7 +37,6 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
     public LocationAdapter(LocationAdapterOnClickHandler clickHandler) {
         mClickHandler = clickHandler;
     }
-
 
 
     @Override
@@ -58,12 +61,15 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
         return mLocationList.size();
     }
 
-    /** this method updates the adapters data
-     * @param mm*/
-    public void setData(List<LocationModel> mm) {
+    /**
+     * this method updates the adapters data
+     *
+     * @param mNewLocationList
+     */
+    public void setData(List<LocationModel> mNewLocationList) {
         if (mLocationList != null)
             mLocationList.clear();
-        mLocationList = mm;
+        mLocationList = mNewLocationList;
         notifyDataSetChanged();
     }
 
@@ -71,13 +77,15 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
         return mLocationList;
     }
 
-    protected class LocationViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    protected class LocationViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
 
-        @BindView(R.id.destination_address_txt) TextView mAddress;
-        @BindView(R.id.destination_name_txt) TextView mLocationName;
+        @BindView(R.id.destination_address_txt)
+        TextView mAddress;
+        @BindView(R.id.destination_name_txt)
+        TextView mLocationName;
 
-        public LocationViewHolder(View itemView) {
+        private LocationViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
             itemView.setOnClickListener(this);

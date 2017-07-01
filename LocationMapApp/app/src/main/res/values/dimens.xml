@@ -1,5 +1,4 @@
 <resources>
-
     <!--default dimens-->
     <dimen name="zero">0dp</dimen>
     <dimen name="default_margin">8dp</dimen>
@@ -7,14 +6,6 @@
     <dimen name="med_lg_margin">16dp</dimen>
     <dimen name="lg_margin">24dp</dimen>
     <dimen name="xlg_margin">32dp</dimen>
-
-
-    <dimen name="details_mov_title_height">114dp</dimen>
-
-
-    <!--details page poster dimens-->
-    <dimen name="maps_width">182dp</dimen>
-    <dimen name="maps_height">200dp</dimen>
 
     <!--text dimens-->
     <dimen name="default_txt_size">18sp</dimen>
