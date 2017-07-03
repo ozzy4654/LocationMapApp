@@ -34,13 +34,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-import static com.ozan_kalan.locationmapapp.ui.LocationDetailedActivity.LOCATION_ADDRESS;
-import static com.ozan_kalan.locationmapapp.ui.LocationDetailedActivity.LOCATION_ETA;
-import static com.ozan_kalan.locationmapapp.ui.LocationDetailedActivity.LOCATION_ID;
-import static com.ozan_kalan.locationmapapp.ui.LocationDetailedActivity.LOCATION_LAT;
-import static com.ozan_kalan.locationmapapp.ui.LocationDetailedActivity.LOCATION_LONG;
-import static com.ozan_kalan.locationmapapp.ui.LocationDetailedActivity.LOCATION_NAME;
-
 public class MainActivity extends AppCompatActivity implements LocationAdapter.LocationAdapterOnClickHandler {
 
     public static final String LIST = "list";
@@ -80,7 +73,6 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.L
             queryLocationAPI(getResources().getString(R.string.locations_endpoint));
 
     }
-
 
     /**
      * This method checks to see if the device is online,
@@ -158,6 +150,25 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.L
         return true;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.sort_name) {
+            sortLocations(mLocationAdapter.getData(), 0);
+            return true;
+        }
+        if (item.getItemId() == R.id.sort_distance) {
+
+            sortLocations(mLocationAdapter.getData(), 1);
+            return true;
+        }
+
+        if (item.getItemId() == R.id.sort_eta) {
+            sortLocations(mLocationAdapter.getData(), 2);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     /**
      * This method is used to sort our List of locations.
      * depending on the int passed in,it will sort by name, location, eta, and defaults to name
@@ -185,25 +196,6 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.L
             }
         });
         mLocationAdapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.sort_name) {
-            sortLocations(mLocationAdapter.getData(), 0);
-            return true;
-        }
-        if (item.getItemId() == R.id.sort_distance) {
-
-            sortLocations(mLocationAdapter.getData(), 1);
-            return true;
-        }
-
-        if (item.getItemId() == R.id.sort_eta) {
-            sortLocations(mLocationAdapter.getData(), 2);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -242,18 +234,9 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.L
     @Override
     public void onClick(LocationModel locationModel) {
 
-        Intent intent = new Intent(getApplicationContext(), LocationDetailedActivity.class);
-
-        Bundle bundle = new Bundle();
-
-        bundle.putString(LOCATION_ADDRESS, locationModel.getAddress());
-        bundle.putString(LOCATION_NAME, locationModel.getName());
-        bundle.putString(LOCATION_ETA, locationModel.getArrivalTime());
-        bundle.putDouble(LOCATION_LAT, locationModel.getLatitude());
-        bundle.putDouble(LOCATION_LONG, locationModel.getLongitude());
-        bundle.putInt(LOCATION_ID, locationModel.getID());
-
-        intent.putExtras(bundle);
+        Intent intent = LocationDetailedActivity.setIntent(getApplicationContext(), locationModel.getName(),
+                locationModel.getAddress(), locationModel.getLatitude(),
+                locationModel.getLongitude(), locationModel.getArrivalTime(), locationModel.getID());
 
         startActivity(intent);
 
